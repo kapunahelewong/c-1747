@@ -4,6 +4,9 @@ interface CodePreviewProps {
 
 const CodePreview = ({ code }: CodePreviewProps) => {
   const getPreviewContent = () => {
+    // Transform the code to remove export default
+    const transformedCode = code.replace(/export default .*?;?$/m, '');
+    
     return `
       <!DOCTYPE html>
       <html>
@@ -16,10 +19,10 @@ const CodePreview = ({ code }: CodePreviewProps) => {
         <body>
           <div id="root"></div>
           <script type="text/babel">
-            ${code}
+            ${transformedCode}
             
             ReactDOM.render(
-              React.createElement(ExampleComponent),
+              <ExampleComponent />,
               document.getElementById('root')
             );
           </script>
