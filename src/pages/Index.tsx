@@ -2,11 +2,10 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Sidebar from '@/components/Sidebar';
 import ChatHeader from '@/components/ChatHeader';
-import ChatInput from '@/components/ChatInput';
-import ActionButtons from '@/components/ActionButtons';
-import MessageList from '@/components/MessageList';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
-import { Textarea } from '@/components/ui/textarea';
+import ChatBot from '@/components/ChatBot';
+import CodeEditor from '@/components/CodeEditor';
+import CodePreview from '@/components/CodePreview';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -85,31 +84,6 @@ const Index = () => {
     }
   };
 
-  const getPreviewContent = () => {
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
-          <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-          <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-          <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-        </head>
-        <body>
-          <div id="root"></div>
-          <script type="text/babel">
-            ${code}
-            
-            ReactDOM.render(
-              React.createElement(ExampleComponent),
-              document.getElementById('root')
-            );
-          </script>
-        </body>
-      </html>
-    `;
-  };
-
   return (
     <div className="flex h-screen">
       <Sidebar 
@@ -125,56 +99,28 @@ const Index = () => {
           <ResizablePanelGroup direction="horizontal">
             {/* Chat Panel */}
             <ResizablePanel defaultSize={30} minSize={20}>
-              <div className="h-full flex flex-col">
-                {messages.length === 0 ? (
-                  <div className="flex-1 flex items-center justify-center">
-                    <div className="w-full max-w-md px-4 space-y-4">
-                      <div>
-                        <h1 className="mb-8 text-4xl font-semibold text-center">What can I help with?</h1>
-                        <ChatInput onSend={handleSendMessage} isLoading={isLoading} />
-                      </div>
-                      <ActionButtons />
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex-1 overflow-y-auto">
-                      <MessageList messages={messages} />
-                    </div>
-                    <div className="p-4">
-                      <ChatInput onSend={handleSendMessage} isLoading={isLoading} />
-                    </div>
-                  </>
-                )}
-              </div>
+              <ChatBot 
+                isLoading={isLoading}
+                messages={messages}
+                onSendMessage={handleSendMessage}
+              />
             </ResizablePanel>
 
             <ResizableHandle withHandle />
 
             {/* Code Editor Panel */}
             <ResizablePanel defaultSize={35} minSize={30}>
-              <div className="h-full p-4 bg-[#1e1e1e]">
-                <Textarea
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  className="w-full h-full bg-transparent text-white font-mono resize-none focus-visible:ring-0 focus-visible:ring-offset-0 border-none"
-                  placeholder="Write your React component here..."
-                />
-              </div>
+              <CodeEditor 
+                code={code}
+                onChange={setCode}
+              />
             </ResizablePanel>
 
             <ResizableHandle withHandle />
 
             {/* Preview Panel */}
             <ResizablePanel defaultSize={35} minSize={30}>
-              <div className="h-full bg-white">
-                <iframe
-                  srcDoc={getPreviewContent()}
-                  className="w-full h-full border-none"
-                  sandbox="allow-scripts"
-                  title="Preview"
-                />
-              </div>
+              <CodePreview code={code} />
             </ResizablePanel>
           </ResizablePanelGroup>
         </div>
