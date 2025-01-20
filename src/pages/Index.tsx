@@ -13,11 +13,36 @@ type Message = {
   content: string;
 };
 
+const defaultCode = `import React from 'react';
+
+const ExampleComponent = () => {
+  const [count, setCount] = React.useState(0);
+
+  return (
+    <div className="p-4 max-w-sm mx-auto bg-white rounded-xl shadow-md">
+      <h2 className="text-xl font-bold mb-4 text-gray-800">
+        Interactive Counter
+      </h2>
+      <p className="text-gray-600 mb-4">
+        Current count: {count}
+      </p>
+      <button
+        onClick={() => setCount(count + 1)}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Increment
+      </button>
+    </div>
+  );
+};
+
+export default ExampleComponent;`;
+
 const Index = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [code, setCode] = useState('// Write your code here');
+  const [code, setCode] = useState(defaultCode);
   const { toast } = useToast();
 
   const handleSendMessage = async (content: string) => {
@@ -58,6 +83,31 @@ const Index = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getPreviewContent = () => {
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+          <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+          <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+          <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        </head>
+        <body>
+          <div id="root"></div>
+          <script type="text/babel">
+            ${code}
+            
+            ReactDOM.render(
+              React.createElement(ExampleComponent),
+              document.getElementById('root')
+            );
+          </script>
+        </body>
+      </html>
+    `;
   };
 
   return (
@@ -108,7 +158,7 @@ const Index = () => {
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   className="w-full h-full bg-transparent text-white font-mono resize-none focus-visible:ring-0 focus-visible:ring-offset-0 border-none"
-                  placeholder="Write your code here..."
+                  placeholder="Write your React component here..."
                 />
               </div>
             </ResizablePanel>
@@ -117,30 +167,12 @@ const Index = () => {
 
             {/* Preview Panel */}
             <ResizablePanel defaultSize={35} minSize={30}>
-              <div className="h-full p-4 bg-white">
+              <div className="h-full bg-white">
                 <iframe
-                  srcDoc={`
-                    <!DOCTYPE html>
-                    <html>
-                      <head>
-                        <style>
-                          body { margin: 0; font-family: sans-serif; }
-                        </style>
-                      </head>
-                      <body>
-                        <script>
-                          try {
-                            ${code}
-                          } catch (error) {
-                            document.body.innerHTML = '<pre style="color: red;">' + error + '</pre>';
-                          }
-                        </script>
-                      </body>
-                    </html>
-                  `}
+                  srcDoc={getPreviewContent()}
                   className="w-full h-full border-none"
                   sandbox="allow-scripts"
-                  title="Code Preview"
+                  title="Preview"
                 />
               </div>
             </ResizablePanel>
